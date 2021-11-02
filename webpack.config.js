@@ -1,7 +1,16 @@
 const path = require("path")
+const fs = require("fs")
+
+function getTypeScriptConfigPaths() {
+    const json = fs.readFileSync(path.resolve(__dirname, "tsconfig.json"), "utf8")
+    const tsconfig = JSON.parse(json.replace(/\/\/.+$|\/\*.*\*\//gm, ""))
+    return Object.fromEntries(Object.entries(tsconfig?.compilerOptions?.paths).map(([key, value]) => {
+        return [key.replace(/\/\*/g, ""), value.map(val => path.resolve(__dirname, val.replace(/\/\*/g, "")))]
+    }))
+}
 
 module.exports = {
-    entry: "./src/index.ts",
+    entry: "./src/main.ts",
     devtool: 'inline-source-map',
     module: {
         rules: [
@@ -21,9 +30,7 @@ module.exports = {
         ]
     },
     resolve: {
-        alias: {
-            "@": path.resolve(__dirname, "./"),
-        },
+        alias: getTypeScriptConfigPaths(),
         extensions: ['.ts', '.js']
     },
     output: {
