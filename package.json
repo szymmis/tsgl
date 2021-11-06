@@ -4,14 +4,16 @@
   "license": "MIT",
   "scripts": {
     "dev": "webpack serve --port 3000 --mode development --open",
-    "build": "webpack --mode production"
+    "build": "webpack --mode production",
+    "lint": "eslint src",
+    "prepare": "husky install"
   },
   "devDependencies": {
     "typescript": "^4.4.4",
     "eslint": "^8.1.0",
     "@typescript-eslint/eslint-plugin": "^5.2.0",
     "@typescript-eslint/parser": "^5.2.0",
-    "husky": "^7.0.4",
+    "husky": "^7.0.0",
     "prettier": "^2.4.1",
     "ts-loader": "^9.2.6",
     "webpack": "^5.61.0",

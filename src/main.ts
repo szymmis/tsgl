@@ -6,7 +6,6 @@ import asset from '../assets/images/sprite.png';
 document.addEventListener('DOMContentLoaded', async () => {
   const canvas = document.createElement('canvas');
   document.body.appendChild(canvas);
-
   const tsgl = TSGL.init(canvas, {
     clearColor: { r: 1, g: 1, b: 1 },
   });
