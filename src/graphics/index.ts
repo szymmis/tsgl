@@ -1,8 +1,14 @@
 import { ShaderLoader } from '@src/loaders/shaders';
-import { CanvasInitOptions } from '@ts/graphics';
+import { Region, TSGLInitialOptions } from '@ts/graphics';
 import { Utils } from '@src/graphics/utils';
+import { loadImageSync } from '@src/loaders/index';
 
-export function init(canvas: HTMLCanvasElement, options?: CanvasInitOptions) {
+import fontJSON from '../../assets/font/font.json';
+
+import fontTextureSource from '../../assets/images/font.png';
+import Font from './font';
+
+export function init(canvas: HTMLCanvasElement, options?: TSGLInitialOptions) {
   canvas.width = options?.width ?? 800;
   canvas.height = options?.height ?? 600;
 
@@ -26,10 +32,14 @@ export function init(canvas: HTMLCanvasElement, options?: CanvasInitOptions) {
     translation: gl.getUniformLocation(program, 'u_translation'),
     scale: gl.getUniformLocation(program, 'u_scale'),
     rotation: gl.getUniformLocation(program, 'u_rotation'),
+    region: gl.getUniformLocation(program, 'u_region'),
+    textureSize: gl.getUniformLocation(program, 'u_textureSize'),
+    worldScale: gl.getUniformLocation(program, 'u_worldScale'),
   };
 
   gl.viewport(0, 0, gl.canvas.width, gl.canvas.height);
   gl.uniform2f(uniforms.resolution, gl.canvas.width, gl.canvas.height);
+  gl.uniform2f(uniforms.worldScale, 2, 2);
 
   const buffers = {
     texCoord: Utils.bindAttribWithBuffer(gl, program, 'a_texCoord'),
@@ -43,20 +53,38 @@ export function init(canvas: HTMLCanvasElement, options?: CanvasInitOptions) {
 
   Utils.createAndBindTexture(gl);
 
-  return {
-    setImage: (img: HTMLImageElement) => Utils.setImage(gl, img),
-    drawRect: (
-      x: number,
-      y: number,
-      width: number,
-      height: number,
-      rotation = 0,
-    ) => {
-      gl.uniform2f(uniforms.translation, x, y);
-      gl.uniform2f(uniforms.scale, width, height);
-      gl.uniform1f(uniforms.rotation, rotation);
+  const setImage = (img: HTMLImageElement, region?: Region) => {
+    Utils.setImage(gl, img);
+    const { x, y, width, height } = region ?? {
+      x: 0,
+      y: 0,
+      width: img.width,
+      height: img.height,
+    };
+    gl.uniform4f(uniforms.region, x, y, width, height);
+    gl.uniform2f(uniforms.textureSize, img.width, img.height);
+  };
 
-      gl.drawArrays(gl.TRIANGLES, 0, 6);
-    },
+  const drawRect = (
+    x: number,
+    y: number,
+    width: number,
+    height: number,
+    rotation = 0,
+  ) => {
+    gl.uniform2f(uniforms.translation, x, y);
+    gl.uniform2f(uniforms.scale, width, height);
+    gl.uniform1f(uniforms.rotation, rotation);
+
+    gl.drawArrays(gl.TRIANGLES, 0, 6);
+  };
+
+  const font = new Font(loadImageSync(fontTextureSource), JSON.parse(fontJSON));
+
+  return {
+    setImage,
+    drawRect,
+    drawText: (text: string, x: number, y: number) =>
+      font.drawText(gl, uniforms, text, x, y),
   };
 }

@@ -20,6 +20,10 @@ module.exports = {
                 exclude: /node-modules/
             },
             {
+                test: /\.(json)$/i,
+                type: "asset/source"
+            },
+            {
                 test: /\.(glsl)$/i,
                 type: "asset/source"
             },

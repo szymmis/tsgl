@@ -1,0 +1,10 @@
+{
+  "letters": "aąbcćdeęfghijklłmnoópqrstuvwxyzźż1234567890!?.,;:()[]+-=\"/\\",
+  "defaultSize": 5,
+  "customSize": {
+    "2": "i1!.,;:\"",
+    "3": "()[]/\\",
+    "4": "4?+-=",
+    "6": "mtuwxyzźż"
+  }
+}
