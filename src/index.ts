@@ -87,7 +87,6 @@ export function init(canvas: HTMLCanvasElement, options?: TSGLInitialOptions) {
     drawRect,
     drawText: (text: string, x: number, y: number) =>
       font.drawText(gl, uniforms, text, x, y),
+    loadImage: AssetLoader.loadImage,
   };
 }
-
-export const { loadImage } = AssetLoader;
