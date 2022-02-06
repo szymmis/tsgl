@@ -15,6 +15,6 @@
     "strict": true,
     "skipLibCheck": true
   },
-  "include": ["src", "index.d.ts"],
+  "include": ["src", "src/assets/index.ts"],
   "exclude": ["node_modules"]
 }

@@ -10,5 +10,8 @@
     "sourceType": "module"
   },
   "plugins": ["@typescript-eslint"],
-  "rules": {}
+  "rules": {
+    "no-console": ["error", { "allow": ["warn", "error"] }]
+  },
+  "ignorePatterns": ["node_modules", "dist", "**/*.json", "**/*.config.js"]
 }
