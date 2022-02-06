@@ -46,6 +46,6 @@ module.exports = {
         publicPath: ""
     },
     plugins: [
-        new CopyPlugin({ patterns: [{ from: "./src/index.d.ts" }] })
+        new CopyPlugin({ patterns: [{ from: "./src/ts/index.d.ts" }] })
     ]
 }

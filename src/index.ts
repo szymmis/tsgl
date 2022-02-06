@@ -1,4 +1,4 @@
-import { Region, TSGLInitialOptions } from '@src/index.d';
+import { Region, TSGLInitialOptions } from '@src/ts';
 import { Utils } from '@libs/Utils';
 import { AssetLoader, ShaderLoader } from '@libs/Loaders';
 
