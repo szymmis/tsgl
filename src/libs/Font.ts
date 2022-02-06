@@ -1,5 +1,5 @@
-import { FontConfig, FontGlyphsSet } from '@ts/font';
-import { Utils } from './utils';
+import { FontConfig, FontGlyphsSet } from '@src/ts/Font';
+import { Utils } from '@libs/Utils';
 
 export default class Font {
   public texture: HTMLImageElement;

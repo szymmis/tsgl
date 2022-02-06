@@ -1,6 +1,8 @@
 const path = require("path")
 const fs = require("fs")
 
+const CopyPlugin = require("copy-webpack-plugin");
+
 function getTypeScriptConfigPaths() {
     const json = fs.readFileSync(path.resolve(__dirname, "tsconfig.json"), "utf8")
     const tsconfig = JSON.parse(json.replace(/\/\/.+$|\/\*.*\*\//gm, ""))
@@ -10,26 +12,22 @@ function getTypeScriptConfigPaths() {
 }
 
 module.exports = {
-    entry: "./src/main.ts",
-    devtool: 'inline-source-map',
+    entry: "./src/index.ts",
+    // devtool: 'inline-source-map',
     module: {
         rules: [
             {
-                test: /\.(ts)$/i,
+                test: /\.ts$/i,
                 use: 'ts-loader',
                 exclude: /node-modules/
             },
             {
-                test: /\.(json)$/i,
-                type: "asset/source"
-            },
-            {
-                test: /\.(glsl)$/i,
+                test: /\.(json|glsl)$/i,
                 type: "asset/source"
             },
             {
                 test: /\.(png)$/i,
-                type: "asset/resource"
+                type: "asset/inline"
             },
         ]
     },
@@ -38,7 +36,16 @@ module.exports = {
         extensions: ['.ts', '.js']
     },
     output: {
-        filename: "main.js",
-        path: path.join(__dirname, "./dist")
-    }
+        filename: "index.js",
+        path: path.join(__dirname, "./dist"),
+        library: {
+            type: "umd",
+            name: "TSGL"
+        },
+        globalObject: "this",
+        publicPath: ""
+    },
+    plugins: [
+        new CopyPlugin({ patterns: [{ from: "./src/index.d.ts" }] })
+    ]
 }

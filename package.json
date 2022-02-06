@@ -1,23 +1,40 @@
 {
   "name": "tsgl",
-  "version": "0.0.1",
+  "description": "Yet another WebGL TypeScript wrapper",
+  "version": "0.1.0",
   "license": "MIT",
+  "repository": "git@github.com:szymmis/tsgl",
+  "author": "Szymon Miśtal <mistalzaq@gmail.com>",
+  "main": "dist/index.js",
+  "files": [
+    "dist"
+  ],
   "scripts": {
-    "dev": "webpack serve --port 3000 --mode development --open",
+    "dev": "webpack --mode development --watch",
+    "dev:server": "webpack serve --port 3000 --mode development --open",
     "build": "webpack --mode production",
     "lint": "eslint src",
     "prepare": "husky install"
   },
   "devDependencies": {
-    "typescript": "^4.4.4",
-    "eslint": "^8.1.0",
     "@typescript-eslint/eslint-plugin": "^5.2.0",
     "@typescript-eslint/parser": "^5.2.0",
+    "copy-webpack-plugin": "^10.2.4",
+    "eslint": "^8.1.0",
     "husky": "^7.0.0",
     "prettier": "^2.4.1",
     "ts-loader": "^9.2.6",
+    "typescript": "^4.4.4",
     "webpack": "^5.61.0",
     "webpack-cli": "^4.9.1",
     "webpack-dev-server": "^4.4.0"
-  }
+  },
+  "keywords": [
+    "yet",
+    "another",
+    "simple",
+    "typescript",
+    "webgl",
+    "wrapper"
+  ]
 }

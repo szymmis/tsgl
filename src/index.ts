@@ -1,12 +1,11 @@
-import { ShaderLoader } from '@src/loaders/shaders';
-import { Region, TSGLInitialOptions } from '@ts/graphics';
-import { Utils } from '@src/graphics/utils';
-import { loadImageSync } from '@src/loaders/index';
+import { Region, TSGLInitialOptions } from '@src/index.d';
+import { Utils } from '@libs/Utils';
+import { AssetLoader, ShaderLoader } from '@libs/Loaders';
 
-import fontJSON from '../../assets/font/font.json';
+import fontJSON from '@assets/font/font.json';
 
-import fontTextureSource from '../../assets/images/font.png';
-import Font from './font';
+import fontTextureSource from '@assets/font/font.png';
+import Font from './libs/Font';
 
 export function init(canvas: HTMLCanvasElement, options?: TSGLInitialOptions) {
   canvas.width = options?.width ?? 800;
@@ -52,7 +51,6 @@ export function init(canvas: HTMLCanvasElement, options?: TSGLInitialOptions) {
   );
 
   Utils.createAndBindTexture(gl);
-
   const setImage = (img: HTMLImageElement, region?: Region) => {
     Utils.setImage(gl, img);
     const { x, y, width, height } = region ?? {
@@ -79,7 +77,10 @@ export function init(canvas: HTMLCanvasElement, options?: TSGLInitialOptions) {
     gl.drawArrays(gl.TRIANGLES, 0, 6);
   };
 
-  const font = new Font(loadImageSync(fontTextureSource), JSON.parse(fontJSON));
+  const font = new Font(
+    AssetLoader.loadImageSync(fontTextureSource),
+    JSON.parse(fontJSON),
+  );
 
   return {
     setImage,
@@ -88,3 +89,5 @@ export function init(canvas: HTMLCanvasElement, options?: TSGLInitialOptions) {
       font.drawText(gl, uniforms, text, x, y),
   };
 }
+
+export const { loadImage } = AssetLoader;
