@@ -1,5 +1,5 @@
 {
-  "name": "tsgl",
+  "name": "@szymmis/tsgl",
   "description": "Yet another WebGL TypeScript wrapper",
   "version": "0.1.0",
   "license": "MIT",
