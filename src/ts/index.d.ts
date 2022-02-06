@@ -11,21 +11,20 @@ export interface Region {
   height: number;
 }
 
+export interface TSGLInstance {
+  loadImage: (src: string) => Promise<HTMLImageElement>;
+  setImage: (img: HTMLImageElement, region?: Region) => void;
+  drawRect: (
+    x: number,
+    y: number,
+    width: number,
+    height: number,
+    rotation: number,
+  ) => void;
+  drawText: (text: string, x: number, y: number) => void;
+}
+
 export function init(
   canvas: HTMLCanvasElement,
   option?: TSGLInitialOptions,
-):
-  | {
-      setImage: (img: HTMLImageElement, region?: Region) => void;
-      drawRect: (
-        x: number,
-        y: number,
-        width: number,
-        height: number,
-        rotation: number,
-      ) => void;
-      drawText: (text: string, x: number, y: number) => void;
-    }
-  | undefined;
-
-export function loadImage(src: string): Promise<HTMLImageElement>;
+): TSGLInstance | undefined;
