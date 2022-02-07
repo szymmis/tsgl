@@ -85,7 +85,7 @@ const tsgl = TSGL.init(document.querySelector('canvas'), {
 | ------------------------------------------------------------------------ |
 | [loadImage(src): HTMLImageElement](#async-loadimagesrc-htmlimageelement) |
 | [setImage(img): void](#setimageimg-void)                                 |
-| [drawRect(x, y, w, h): void](#drawrectx-y-w-h-void)                      |
+| [drawRect(x, y, w, h, rotation?): void](#drawrectx-y-w-h-rotation-void)  |
 | [drawText(text, x, y): void](#drawtexttext-x-y-void)                     |
 
 ### `async loadImage(src): HTMLImageElement`
@@ -128,7 +128,7 @@ A function used to set passed `HTMLImageElement` as an active texture ready to b
 })();
 ```
 
-### `drawRect(x, y, w, h): void`
+### `drawRect(x, y, w, h, rotation?): void`
 
 A function used to draw an image previously loaded into memory with `setImage()`
 
@@ -136,6 +136,7 @@ A function used to draw an image previously loaded into memory with `setImage()`
 - **`y: number`** - its vertical position
 - **`w: number`** - its width
 - **`h: number`** - its height
+- **`rotation?: number`** - (optional) rotation of the rect in radians
 
 ```js
 (async function () {
@@ -179,7 +180,8 @@ A function used to draw text on a screen using build-in bitmap font
 ### ⚠️ **Note** ⚠️
 
 Only the basic ASCII characters as\
-`"aąbcćdeęfghijklłmnoópqrstuvwxyzźż1234567890!?.,;:()[]+-=\"/\\"`\
+`aąbcćdeęfghijklłmnoópqrstuvwxyzźż`\
+`1234567890!?.,;:()[]+-="\`\
 are supported right now
 
 ## License
