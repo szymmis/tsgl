@@ -9,9 +9,11 @@
     "ecmaVersion": "latest",
     "sourceType": "module"
   },
-  "plugins": ["@typescript-eslint"],
+  "plugins": ["@typescript-eslint", "eslint-plugin-simple-import-sort"],
   "rules": {
-    "no-console": ["error", { "allow": ["warn", "error"] }]
+    "no-console": ["error", { "allow": ["warn", "error"] }],
+    "simple-import-sort/imports": "error",
+    "simple-import-sort/exports": "error"
   },
   "ignorePatterns": ["node_modules", "dist", "**/*.json", "**/*.config.js"]
 }
