@@ -56,8 +56,9 @@ class Utils {
     return buffer;
   }
 
-  public createAndBindTexture(gl: WebGL2RenderingContext) {
+  public createAndBindTexture(gl: WebGL2RenderingContext, index = 0) {
     const texture = gl.createTexture();
+    gl.activeTexture(gl.TEXTURE0 + index);
     gl.bindTexture(gl.TEXTURE_2D, texture);
 
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
@@ -80,6 +81,23 @@ class Utils {
     if (!buffer) return;
     gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
     gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(data), gl.DYNAMIC_DRAW);
+  }
+
+  public concatImages(img: HTMLImageElement, img2: HTMLImageElement) {
+    const canvas = document.createElement('canvas');
+    const ctx = canvas.getContext('2d');
+
+    if (!ctx) return;
+
+    canvas.width = img.width + img2.width;
+    canvas.height = Math.max(img.height, img2.height);
+
+    ctx.drawImage(img, 0, 0);
+    ctx.drawImage(img2, img.width, 0);
+
+    const output = document.createElement('img');
+    output.src = canvas.toDataURL();
+    return output;
   }
 }
 

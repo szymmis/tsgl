@@ -3,11 +3,19 @@ import fontTextureSource from '@assets/font/font.png';
 import Utils from '@libs/Utils';
 import AssetLoader from '@src/libs/loaders/AssetLoader';
 import ShaderLoader from '@src/libs/loaders/ShaderLoader';
-import { Region, TSGLInitialOptions } from '@src/ts/index';
+import { TSGLDrawOptions, TSGLInitialOptions } from '@src/ts/index';
 
 import Font from './libs/Font';
+import { Texture } from './libs/Texture';
 
 class TSGL {
+  private spriteBatch: HTMLImageElement = new Image();
+  private __textCoord: number[] = [];
+  private __translation: number[] = [];
+  private __rotation: number[] = [];
+  private __scale: number[] = [];
+  private __region: number[] = [];
+
   public init(canvas: HTMLCanvasElement, options?: TSGLInitialOptions) {
     canvas.width = options?.width ?? 800;
     canvas.height = options?.height ?? 600;
@@ -29,10 +37,6 @@ class TSGL {
 
     const uniforms = {
       resolution: gl.getUniformLocation(program, 'u_resolution'),
-      translation: gl.getUniformLocation(program, 'u_translation'),
-      scale: gl.getUniformLocation(program, 'u_scale'),
-      rotation: gl.getUniformLocation(program, 'u_rotation'),
-      region: gl.getUniformLocation(program, 'u_region'),
       textureSize: gl.getUniformLocation(program, 'u_textureSize'),
       worldScale: gl.getUniformLocation(program, 'u_worldScale'),
     };
@@ -43,39 +47,39 @@ class TSGL {
 
     const buffers = {
       texCoord: Utils.bindAttribWithBuffer(gl, program, 'a_texCoord'),
+      translation: Utils.bindAttribWithBuffer(gl, program, 'a_translation'),
+      rotation: Utils.bindAttribWithBuffer(gl, program, 'a_rotation', 1),
+      scale: Utils.bindAttribWithBuffer(gl, program, 'a_scale'),
+      region: Utils.bindAttribWithBuffer(gl, program, 'a_region', 4),
     };
 
-    Utils.insertBufferData(
-      gl,
-      buffers.texCoord,
-      [0.0, 1.0, 1.0, 1.0, 1.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0],
-    );
+    const createTexture = async (src: string) => {
+      const img = await AssetLoader.loadImage(src);
 
-    Utils.createAndBindTexture(gl);
-    const setImage = (img: HTMLImageElement, region?: Region) => {
-      Utils.setImage(gl, img);
-      const { x, y, width, height } = region ?? {
-        x: 0,
-        y: 0,
-        width: img.width,
-        height: img.height,
-      };
-      gl.uniform4f(uniforms.region, x, y, width, height);
-      gl.uniform2f(uniforms.textureSize, img.width, img.height);
-    };
+      return new Promise((resolve, reject) => {
+        const combinedTexture = Utils.concatImages(this.spriteBatch, img);
+        if (!combinedTexture) return reject();
 
-    const drawRect = (
-      x: number,
-      y: number,
-      width: number,
-      height: number,
-      rotation = 0,
-    ) => {
-      gl.uniform2f(uniforms.translation, x, y);
-      gl.uniform2f(uniforms.scale, width, height);
-      gl.uniform1f(uniforms.rotation, rotation);
+        combinedTexture.onload = () => {
+          this.spriteBatch = combinedTexture;
+          Utils.createAndBindTexture(gl);
+          Utils.setImage(gl, this.spriteBatch);
+          gl.uniform2f(
+            uniforms.textureSize,
+            this.spriteBatch.width,
+            this.spriteBatch.height,
+          );
 
-      gl.drawArrays(gl.TRIANGLES, 0, 6);
+          resolve(
+            new Texture(
+              combinedTexture.width - img.width,
+              0,
+              img.width,
+              img.height,
+            ),
+          );
+        };
+      });
     };
 
     const font = new Font(
@@ -83,12 +87,69 @@ class TSGL {
       JSON.parse(fontJSON),
     );
 
+    const drawImage = (
+      img: Texture,
+      x: number,
+      y: number,
+      options?: TSGLDrawOptions,
+    ) => {
+      this.__textCoord.push(
+        0.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        0.0,
+        1.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        1.0,
+      );
+      const region = options?.region;
+      const computedRegion = img.getSubtexture(
+        region?.x,
+        region?.y,
+        region?.width,
+        region?.height,
+      );
+      for (let i = 0; i < 6; i++) {
+        this.__translation.push(x, y);
+        this.__rotation.push(options?.rotation ?? 0);
+        this.__scale.push(
+          options?.width ?? img.width,
+          options?.height ?? img.height,
+        );
+        this.__region.push(
+          computedRegion.x,
+          computedRegion.y,
+          computedRegion.width,
+          computedRegion.height,
+        );
+      }
+    };
+
+    const commitGraphics = () => {
+      Utils.insertBufferData(gl, buffers.texCoord, this.__textCoord);
+      Utils.insertBufferData(gl, buffers.translation, this.__translation);
+      Utils.insertBufferData(gl, buffers.rotation, this.__rotation);
+      Utils.insertBufferData(gl, buffers.scale, this.__scale);
+      Utils.insertBufferData(gl, buffers.region, this.__region);
+      gl.drawArrays(gl.TRIANGLES, 0, this.__rotation.length);
+      this.__textCoord.length = 0;
+      this.__translation.length = 0;
+      this.__rotation.length = 0;
+      this.__scale.length = 0;
+      this.__region.length = 0;
+    };
+
     return {
-      setImage,
-      drawRect,
+      createTexture,
+      drawImage,
       drawText: (text: string, x: number, y: number) =>
         font.drawText(gl, uniforms, text, x, y),
-      loadImage: (src: string) => AssetLoader.loadImage(src),
+      commitGraphics,
     };
   }
 }

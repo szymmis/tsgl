@@ -4,27 +4,44 @@ export interface TSGLInitialOptions {
   clearColor?: { r: number; g: number; b: number };
 }
 
-export interface Region {
+export interface TSGLRegion {
   x: number;
   y: number;
   width: number;
   height: number;
 }
 
-export interface TSGLInstance {
-  loadImage: (src: string) => Promise<HTMLImageElement>;
-  setImage: (img: HTMLImageElement, region?: Region) => void;
-  drawRect: (
-    x: number,
-    y: number,
-    width: number,
-    height: number,
-    rotation: number,
-  ) => void;
-  drawText: (text: string, x: number, y: number) => void;
+export interface TSGLTexture {
+  width: number;
+  height: number;
+  getSubtexture: (
+    x?: number,
+    y?: number,
+    width?: number,
+    height?: number,
+  ) => TSGLRegion;
 }
 
 export function init(
   canvas: HTMLCanvasElement,
   option?: TSGLInitialOptions,
 ): TSGLInstance | undefined;
+
+export interface TSGLDrawOptions {
+  width?: number;
+  height?: number;
+  rotation?: number;
+  region?: TSGLRegion;
+}
+
+export interface TSGLInstance {
+  createTexture: (src: string) => Promise<TSGLTexture>;
+  drawImage: (
+    img: TSGLImage,
+    x: number,
+    y: number,
+    options?: TSGLDrawOptions,
+  ) => void;
+  drawText: (text: string, x: number, y: number) => void;
+  commitGraphics: () => void;
+}
