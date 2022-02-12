@@ -1,11 +1,10 @@
-import { Region, TSGLInitialOptions } from '@src/ts';
+import fontJSON from '@assets/font/font.json';
+import fontTextureSource from '@assets/font/font.png';
 import Utils from '@libs/Utils';
 import AssetLoader from '@src/libs/loaders/AssetLoader';
 import ShaderLoader from '@src/libs/loaders/ShaderLoader';
+import { Region, TSGLInitialOptions } from '@src/ts';
 
-import fontJSON from '@assets/font/font.json';
-
-import fontTextureSource from '@assets/font/font.png';
 import Font from './libs/Font';
 
 export function init(canvas: HTMLCanvasElement, options?: TSGLInitialOptions) {
