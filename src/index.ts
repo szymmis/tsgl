@@ -1,6 +1,7 @@
 import { Region, TSGLInitialOptions } from '@src/ts';
-import { Utils } from '@libs/Utils';
-import { AssetLoader, ShaderLoader } from '@libs/Loaders';
+import Utils from '@libs/Utils';
+import AssetLoader from '@src/libs/loaders/AssetLoader';
+import ShaderLoader from '@src/libs/loaders/ShaderLoader';
 
 import fontJSON from '@assets/font/font.json';
 
