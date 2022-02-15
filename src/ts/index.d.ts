@@ -1,6 +1,7 @@
 export interface TSGLInitialOptions {
   width?: number;
   height?: number;
+  worldScale?: { x: number; y: number };
   clearColor?: { r: number; g: number; b: number };
 }
 

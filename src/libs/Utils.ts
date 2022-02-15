@@ -76,11 +76,11 @@ export const Utils = {
   insertBufferData(
     gl: WebGL2RenderingContext,
     buffer: WebGLBuffer | null,
-    data: number[],
+    data: Float32Array,
   ) {
     if (!buffer) return;
     gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
-    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(data), gl.DYNAMIC_DRAW);
+    gl.bufferData(gl.ARRAY_BUFFER, data, gl.DYNAMIC_DRAW);
   },
 
   concatImages(img: HTMLImageElement, img2: HTMLImageElement) {

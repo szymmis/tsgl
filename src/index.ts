@@ -1,24 +1,39 @@
 import fontJSON from '@assets/font/font.json';
 import fontTextureSource from '@assets/font/font.png';
+import { Font } from '@libs/Font';
+import { Texture } from '@libs/Texture';
 import { Utils } from '@libs/Utils';
 import { AssetLoader } from '@src/libs/loaders/AssetLoader';
 import { ShaderLoader } from '@src/libs/loaders/ShaderLoader';
 import { TSGLDrawOptions, TSGLInitialOptions } from '@src/ts/index';
+import {
+  Attribute,
+  AttributesDataArrays,
+  AttributesSet,
+  UniformsSet,
+} from '@ts/WebGL';
 
-import { Font } from './libs/Font';
-import { Texture } from './libs/Texture';
-
-type Uniform = 'resolution' | 'textureSize' | 'worldScale';
-type Attribute = 'texCoord' | 'translation' | 'rotation' | 'scale' | 'region';
+const POINTS_PER_SHAPE = 6;
+const ARRAY_SIZE = 2500;
+const ATTRIBUTE_SIZES: Record<Attribute, number> = {
+  region: 4 * POINTS_PER_SHAPE,
+  rotation: 1 * POINTS_PER_SHAPE,
+  scale: 2 * POINTS_PER_SHAPE,
+  texCoord: 2 * POINTS_PER_SHAPE,
+  translation: 2 * POINTS_PER_SHAPE,
+};
 
 class TSGL {
+  private pointer = 0;
+
   private spriteBatch: HTMLImageElement = new Image();
-  private attributesData: Record<Attribute, number[]> = {
-    region: [],
-    rotation: [],
-    scale: [],
-    texCoord: [],
-    translation: [],
+
+  private attributesArrays: AttributesDataArrays = {
+    region: new Float32Array(ARRAY_SIZE * ATTRIBUTE_SIZES.region),
+    rotation: new Float32Array(ARRAY_SIZE * ATTRIBUTE_SIZES.rotation),
+    scale: new Float32Array(ARRAY_SIZE * ATTRIBUTE_SIZES.scale),
+    texCoord: new Float32Array(ARRAY_SIZE * ATTRIBUTE_SIZES.texCoord),
+    translation: new Float32Array(ARRAY_SIZE * ATTRIBUTE_SIZES.translation),
   };
 
   public init(canvas: HTMLCanvasElement, options?: TSGLInitialOptions) {
@@ -40,7 +55,7 @@ class TSGL {
     gl.enable(gl.BLEND);
     gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
 
-    const UNIFORMS: Record<Uniform, WebGLUniformLocation | null> = {
+    const UNIFORMS: UniformsSet = {
       resolution: gl.getUniformLocation(program, 'u_resolution'),
       textureSize: gl.getUniformLocation(program, 'u_textureSize'),
       worldScale: gl.getUniformLocation(program, 'u_worldScale'),
@@ -48,15 +63,24 @@ class TSGL {
 
     gl.viewport(0, 0, gl.canvas.width, gl.canvas.height);
     gl.uniform2f(UNIFORMS.resolution, gl.canvas.width, gl.canvas.height);
-    gl.uniform2f(UNIFORMS.worldScale, 2, 2);
+    gl.uniform2f(
+      UNIFORMS.worldScale,
+      options?.worldScale?.x || 2,
+      options?.worldScale?.y || 2,
+    );
 
-    const ATTRIBUTES: Record<Attribute, WebGLBuffer | null> = {
+    const ATTRIBUTES: AttributesSet = {
       texCoord: Utils.bindAttribWithBuffer(gl, program, 'a_texCoord'),
       translation: Utils.bindAttribWithBuffer(gl, program, 'a_translation'),
       rotation: Utils.bindAttribWithBuffer(gl, program, 'a_rotation', 1),
       scale: Utils.bindAttribWithBuffer(gl, program, 'a_scale'),
       region: Utils.bindAttribWithBuffer(gl, program, 'a_region', 4),
     };
+
+    const font = new Font(
+      AssetLoader.loadImageSync(fontTextureSource),
+      JSON.parse(fontJSON),
+    );
 
     const createTexture = async (src: string) => {
       const img = await AssetLoader.loadImage(src);
@@ -87,10 +111,13 @@ class TSGL {
       });
     };
 
-    const font = new Font(
-      AssetLoader.loadImageSync(fontTextureSource),
-      JSON.parse(fontJSON),
-    );
+    const getAttributePointerLocation = (attr: Attribute) => {
+      return this.pointer * ATTRIBUTE_SIZES[attr];
+    };
+
+    const setAttributeData = (attr: Attribute, data: ArrayLike<number>) => {
+      this.attributesArrays[attr].set(data, getAttributePointerLocation(attr));
+    };
 
     const drawImage = (
       img: Texture,
@@ -98,21 +125,8 @@ class TSGL {
       y: number,
       options?: TSGLDrawOptions,
     ) => {
-      this.attributesData.texCoord.push(
-        0.0,
-        1.0,
-        1.0,
-        1.0,
-        1.0,
-        0.0,
-        1.0,
-        0.0,
-        0.0,
-        0.0,
-        0.0,
-        1.0,
-      );
       const region = options?.region;
+      const rotation = options?.rotation || 0;
       const { width, height } = {
         width: options?.width ?? img.width,
         height: options?.height ?? img.height,
@@ -123,28 +137,70 @@ class TSGL {
         region?.width,
         region?.height,
       );
-      for (let i = 0; i < 6; i++) {
-        this.attributesData.translation.push(x, y);
-        this.attributesData.rotation.push(options?.rotation ?? 0);
-        this.attributesData.scale.push(width, height);
-        this.attributesData.region.push(
-          computedRegion.x,
-          computedRegion.y,
-          computedRegion.width,
-          computedRegion.height,
-        );
-      }
 
-      if (this.attributesData.texCoord.length >= 5000) drawBatch();
+      setAttributeData(
+        'texCoord',
+        [0.0, 1.0, 1.0, 1.0, 1.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0],
+      );
+      setAttributeData('translation', [x, y, x, y, x, y, x, y, x, y, x, y]);
+      setAttributeData('rotation', [
+        rotation,
+        rotation,
+        rotation,
+        rotation,
+        rotation,
+        rotation,
+      ]);
+      setAttributeData('scale', [
+        width,
+        height,
+        width,
+        height,
+        width,
+        height,
+        width,
+        height,
+        width,
+        height,
+        width,
+        height,
+      ]);
+      setAttributeData('region', [
+        computedRegion.x,
+        computedRegion.y,
+        computedRegion.width,
+        computedRegion.height,
+        computedRegion.x,
+        computedRegion.y,
+        computedRegion.width,
+        computedRegion.height,
+        computedRegion.x,
+        computedRegion.y,
+        computedRegion.width,
+        computedRegion.height,
+        computedRegion.x,
+        computedRegion.y,
+        computedRegion.width,
+        computedRegion.height,
+        computedRegion.x,
+        computedRegion.y,
+        computedRegion.width,
+        computedRegion.height,
+        computedRegion.x,
+        computedRegion.y,
+        computedRegion.width,
+        computedRegion.height,
+      ]);
+
+      if (++this.pointer === ARRAY_SIZE - POINTS_PER_SHAPE) drawBatch();
     };
 
     const drawBatch = () => {
-      const drawArraysLength = this.attributesData.texCoord.length / 2;
-      Object.entries(this.attributesData).forEach(([key, data]) => {
+      Object.entries(this.attributesArrays).forEach(([key, data]) => {
         Utils.insertBufferData(gl, ATTRIBUTES[key as Attribute], data);
-        data.length = 0;
       });
-      gl.drawArrays(gl.TRIANGLES, 0, drawArraysLength);
+      gl.drawArrays(gl.TRIANGLES, 0, this.pointer * 6);
+      this.pointer = 0;
     };
 
     const loop = () => {
