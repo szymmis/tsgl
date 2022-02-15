@@ -1,7 +1,7 @@
-import Utils from '@libs/Utils';
+import { Utils } from '@libs/Utils';
 import { FontConfig, FontGlyphsSet } from '@src/ts/Font';
 
-export default class Font {
+export class Font {
   public texture: HTMLImageElement;
   public glyphs: FontGlyphsSet;
 

@@ -1,4 +1,4 @@
-class Utils {
+export const Utils = {
   createShader(
     gl: WebGL2RenderingContext,
     type: typeof gl.VERTEX_SHADER | typeof gl.FRAGMENT_SHADER,
@@ -15,9 +15,9 @@ class Utils {
 
     console.error(gl.getShaderInfoLog(shader));
     gl.deleteShader(shader);
-  }
+  },
 
-  public createProgram(
+  createProgram(
     gl: WebGL2RenderingContext,
     vertexSource: string,
     fragmentSource: string,
@@ -39,9 +39,9 @@ class Utils {
 
     console.error(gl.getProgramInfoLog(program));
     gl.deleteProgram(program);
-  }
+  },
 
-  public bindAttribWithBuffer(
+  bindAttribWithBuffer(
     gl: WebGL2RenderingContext,
     program: WebGLProgram,
     attribName: string,
@@ -54,9 +54,9 @@ class Utils {
     gl.vertexAttribPointer(pos, size, gl.FLOAT, false, 0, 0);
 
     return buffer;
-  }
+  },
 
-  public createAndBindTexture(gl: WebGL2RenderingContext, index = 0) {
+  createAndBindTexture(gl: WebGL2RenderingContext, index = 0) {
     const texture = gl.createTexture();
     gl.activeTexture(gl.TEXTURE0 + index);
     gl.bindTexture(gl.TEXTURE_2D, texture);
@@ -67,13 +67,13 @@ class Utils {
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
 
     return texture;
-  }
+  },
 
-  public setImage(gl: WebGL2RenderingContext, image: HTMLImageElement) {
+  setImage(gl: WebGL2RenderingContext, image: HTMLImageElement) {
     gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, image);
-  }
+  },
 
-  public insertBufferData(
+  insertBufferData(
     gl: WebGL2RenderingContext,
     buffer: WebGLBuffer | null,
     data: number[],
@@ -81,9 +81,9 @@ class Utils {
     if (!buffer) return;
     gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
     gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(data), gl.DYNAMIC_DRAW);
-  }
+  },
 
-  public concatImages(img: HTMLImageElement, img2: HTMLImageElement) {
+  concatImages(img: HTMLImageElement, img2: HTMLImageElement) {
     const canvas = document.createElement('canvas');
     const ctx = canvas.getContext('2d');
 
@@ -98,7 +98,5 @@ class Utils {
     const output = document.createElement('img');
     output.src = canvas.toDataURL();
     return output;
-  }
-}
-
-export default new Utils();
+  },
+};

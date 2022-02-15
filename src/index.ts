@@ -1,20 +1,25 @@
 import fontJSON from '@assets/font/font.json';
 import fontTextureSource from '@assets/font/font.png';
-import Utils from '@libs/Utils';
-import AssetLoader from '@src/libs/loaders/AssetLoader';
-import ShaderLoader from '@src/libs/loaders/ShaderLoader';
+import { Utils } from '@libs/Utils';
+import { AssetLoader } from '@src/libs/loaders/AssetLoader';
+import { ShaderLoader } from '@src/libs/loaders/ShaderLoader';
 import { TSGLDrawOptions, TSGLInitialOptions } from '@src/ts/index';
 
-import Font from './libs/Font';
+import { Font } from './libs/Font';
 import { Texture } from './libs/Texture';
+
+type Uniform = 'resolution' | 'textureSize' | 'worldScale';
+type Attribute = 'texCoord' | 'translation' | 'rotation' | 'scale' | 'region';
 
 class TSGL {
   private spriteBatch: HTMLImageElement = new Image();
-  private __textCoord: number[] = [];
-  private __translation: number[] = [];
-  private __rotation: number[] = [];
-  private __scale: number[] = [];
-  private __region: number[] = [];
+  private attributesData: Record<Attribute, number[]> = {
+    region: [],
+    rotation: [],
+    scale: [],
+    texCoord: [],
+    translation: [],
+  };
 
   public init(canvas: HTMLCanvasElement, options?: TSGLInitialOptions) {
     canvas.width = options?.width ?? 800;
@@ -35,17 +40,17 @@ class TSGL {
     gl.enable(gl.BLEND);
     gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
 
-    const uniforms = {
+    const UNIFORMS: Record<Uniform, WebGLUniformLocation | null> = {
       resolution: gl.getUniformLocation(program, 'u_resolution'),
       textureSize: gl.getUniformLocation(program, 'u_textureSize'),
       worldScale: gl.getUniformLocation(program, 'u_worldScale'),
     };
 
     gl.viewport(0, 0, gl.canvas.width, gl.canvas.height);
-    gl.uniform2f(uniforms.resolution, gl.canvas.width, gl.canvas.height);
-    gl.uniform2f(uniforms.worldScale, 2, 2);
+    gl.uniform2f(UNIFORMS.resolution, gl.canvas.width, gl.canvas.height);
+    gl.uniform2f(UNIFORMS.worldScale, 2, 2);
 
-    const buffers = {
+    const ATTRIBUTES: Record<Attribute, WebGLBuffer | null> = {
       texCoord: Utils.bindAttribWithBuffer(gl, program, 'a_texCoord'),
       translation: Utils.bindAttribWithBuffer(gl, program, 'a_translation'),
       rotation: Utils.bindAttribWithBuffer(gl, program, 'a_rotation', 1),
@@ -65,7 +70,7 @@ class TSGL {
           Utils.createAndBindTexture(gl);
           Utils.setImage(gl, this.spriteBatch);
           gl.uniform2f(
-            uniforms.textureSize,
+            UNIFORMS.textureSize,
             this.spriteBatch.width,
             this.spriteBatch.height,
           );
@@ -93,7 +98,7 @@ class TSGL {
       y: number,
       options?: TSGLDrawOptions,
     ) => {
-      this.__textCoord.push(
+      this.attributesData.texCoord.push(
         0.0,
         1.0,
         1.0,
@@ -108,6 +113,10 @@ class TSGL {
         1.0,
       );
       const region = options?.region;
+      const { width, height } = {
+        width: options?.width ?? img.width,
+        height: options?.height ?? img.height,
+      };
       const computedRegion = img.getSubtexture(
         region?.x,
         region?.y,
@@ -115,41 +124,40 @@ class TSGL {
         region?.height,
       );
       for (let i = 0; i < 6; i++) {
-        this.__translation.push(x, y);
-        this.__rotation.push(options?.rotation ?? 0);
-        this.__scale.push(
-          options?.width ?? img.width,
-          options?.height ?? img.height,
-        );
-        this.__region.push(
+        this.attributesData.translation.push(x, y);
+        this.attributesData.rotation.push(options?.rotation ?? 0);
+        this.attributesData.scale.push(width, height);
+        this.attributesData.region.push(
           computedRegion.x,
           computedRegion.y,
           computedRegion.width,
           computedRegion.height,
         );
       }
+
+      if (this.attributesData.texCoord.length >= 5000) drawBatch();
     };
 
-    const commitGraphics = () => {
-      Utils.insertBufferData(gl, buffers.texCoord, this.__textCoord);
-      Utils.insertBufferData(gl, buffers.translation, this.__translation);
-      Utils.insertBufferData(gl, buffers.rotation, this.__rotation);
-      Utils.insertBufferData(gl, buffers.scale, this.__scale);
-      Utils.insertBufferData(gl, buffers.region, this.__region);
-      gl.drawArrays(gl.TRIANGLES, 0, this.__rotation.length);
-      this.__textCoord.length = 0;
-      this.__translation.length = 0;
-      this.__rotation.length = 0;
-      this.__scale.length = 0;
-      this.__region.length = 0;
+    const drawBatch = () => {
+      const drawArraysLength = this.attributesData.texCoord.length / 2;
+      Object.entries(this.attributesData).forEach(([key, data]) => {
+        Utils.insertBufferData(gl, ATTRIBUTES[key as Attribute], data);
+        data.length = 0;
+      });
+      gl.drawArrays(gl.TRIANGLES, 0, drawArraysLength);
     };
+
+    const loop = () => {
+      drawBatch();
+      requestAnimationFrame(loop);
+    };
+    requestAnimationFrame(loop);
 
     return {
       createTexture,
       drawImage,
       drawText: (text: string, x: number, y: number) =>
-        font.drawText(gl, uniforms, text, x, y),
-      commitGraphics,
+        font.drawText(gl, UNIFORMS, text, x, y),
     };
   }
 }
