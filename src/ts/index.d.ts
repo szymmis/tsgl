@@ -15,12 +15,7 @@ export interface TSGLRegion {
 export interface TSGLTexture {
   width: number;
   height: number;
-  getSubtexture: (
-    x?: number,
-    y?: number,
-    width?: number,
-    height?: number,
-  ) => TSGLRegion;
+  getSubtexture: (region?: TSGLRegion) => TSGLRegion;
 }
 
 export function init(
@@ -38,11 +33,10 @@ export interface TSGLDrawOptions {
 export interface TSGLInstance {
   createTexture: (src: string) => Promise<TSGLTexture>;
   drawImage: (
-    img: TSGLImage,
+    img: TSGLTexture,
     x: number,
     y: number,
     options?: TSGLDrawOptions,
   ) => void;
   drawText: (text: string, x: number, y: number) => void;
-  commitGraphics: () => void;
 }

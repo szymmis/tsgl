@@ -4,10 +4,10 @@
     "module": "CommonJS",
     "baseUrl": "./",
     "paths": {
-      "@src/*": ["src/*"],
       "@libs/*": ["src/libs/*"],
       "@ts/*": ["src/ts/*"],
-      "@assets/*": ["src/assets/*"]
+      "@assets/*": ["src/assets/*"],
+      "@src/*": ["src/*"]
     },
     "allowSyntheticDefaultImports": true,
     "esModuleInterop": true,

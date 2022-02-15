@@ -1,5 +1,9 @@
+import fontJSON from '@assets/font/font.json';
+import fontTextureSource from '@assets/font/font.png';
 import { Utils } from '@libs/Utils';
 import { FontConfig, FontGlyphsSet } from '@src/ts/Font';
+
+import { AssetLoader } from './loaders/AssetLoader';
 
 export class Font {
   public texture: HTMLImageElement;
@@ -59,3 +63,8 @@ export class Font {
       }, 0);
   }
 }
+
+export const font = new Font(
+  AssetLoader.loadImageSync(fontTextureSource),
+  JSON.parse(fontJSON),
+);
