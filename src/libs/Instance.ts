@@ -1,14 +1,18 @@
+import fontJSON from '@assets/font/font.json';
+import fontTextureSource from '@assets/font/font.png';
 import { TSGLDrawOptions, TSGLInstance, TSGLTexture } from '@ts/index';
 import { AttributeSet, UniformSet } from '@ts/WebGL';
 
 import { Batch } from './Batch';
-import { font } from './Font';
+import { Font } from './Font';
 import { Texture } from './Texture';
 
 export class Instance implements TSGLInstance {
   private gl: WebGL2RenderingContext;
   private uniforms: UniformSet;
   private attributes: AttributeSet;
+
+  private font: Font;
 
   constructor(
     gl: WebGL2RenderingContext,
@@ -18,6 +22,9 @@ export class Instance implements TSGLInstance {
     this.gl = gl;
     this.uniforms = uniforms;
     this.attributes = attributes;
+
+    Texture.create(gl, uniforms, fontTextureSource);
+    this.font = new Font(JSON.parse(fontJSON));
   }
 
   createTexture(src: string) {
@@ -44,6 +51,6 @@ export class Instance implements TSGLInstance {
   }
 
   drawText(text: string, x: number, y: number) {
-    return font.drawText(this.gl, this.uniforms, text, x, y);
+    return this.font.drawText(this.gl, this.attributes, text, x, y);
   }
 }

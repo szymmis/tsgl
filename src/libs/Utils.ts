@@ -87,7 +87,7 @@ export const Utils = {
     const canvas = document.createElement('canvas');
     const ctx = canvas.getContext('2d');
 
-    if (!ctx) return;
+    if (!ctx) return new Image();
 
     canvas.width = img.width + img2.width;
     canvas.height = Math.max(img.height, img2.height);
