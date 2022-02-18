@@ -7,12 +7,12 @@
 ## Introduction
 
 **TSGL** is a basic wrapper on **WebGL** primitive API. \
-You don't need to worry about creating shaders and compiling programs etc.\
-Simply create a **TSGLInstance** object with `init` function, and use exposed
-simple _abstract_ functions such as
+You don't need to worry about creating shaders, compiling programs etc.\
+Simply create a **TSGLInstance** object with `init` function and use
+it's exposed functions such as
 
-- `drawRect()`
-- `drawText()`
+- [`drawImage()`](#drawimageimg-x-y-options)
+- [`drawText()`](#drawtexttext-x-y)
 
 ## Installation and usage
 
@@ -26,12 +26,11 @@ import TSGL from '@szymmis/tsgl'; // ESModules
 // or
 const TSGL = require('@szymmis/tsgl'); // CommonJS
 
-const canvas = document.querySelector('canvas');
-const tsgl = TSGL.init(canvas);
 (async function () {
-  const img = await tsgl.loadImage('img.png');
-  tsgl.setImage(img);
-  tsgl.drawRect(50, 50, 100, 100);
+  const canvas = document.querySelector('canvas');
+  const tsgl = TSGL.init(canvas);
+  const img = await tsgl.createTexture('img.png');
+  tsgl.drawImage(img, 50, 50);
 })();
 ```
 
@@ -42,12 +41,11 @@ const tsgl = TSGL.init(canvas);
   <canvas></canvas>
   <script src="PATH_TO_TSGL.js"></script>
   <script>
-    const canvas = document.querySelector('canvas');
-    const tsgl = TSGL.init(canvas);
     (async function () {
-      const img = await tsgl.loadImage('img.png');
-      tsgl.setImage(img);
-      tsgl.drawRect(50, 50, 100, 100);
+      const canvas = document.querySelector('canvas');
+      const tsgl = TSGL.init(canvas);
+      const img = await tsgl.createTexture('img.png');
+      tsgl.drawImage(img, 50, 50);
     })();
   </script>
 </body>
@@ -55,21 +53,25 @@ const tsgl = TSGL.init(canvas);
 
 ## Documentation
 
-| Available functions inside global `TSGL` object                          |
-| ------------------------------------------------------------------------ |
-| [init(canvas, options?): TSGLInstance](#initcanvas-options-tsglinstance) |
+| Available functions inside global `TSGL` object                               |
+| ----------------------------------------------------------------------------- |
+| [`init(canvas, options?) => TSGLInstance`](#initcanvas-options--tsglinstance) |
 
-### `init(canvas, options?): TSGLInstance`
+### `init(canvas, options?) => TSGLInstance`
 
-A function used to load an Image from the file. It returns promise that resolves to a simple `HTMLImageElement`. You don't need to use this function, you only need the `HTMLImageElement` to use in the `setImage()` function
+Function used to create a `TSGLInstance` object and set up `WebGL` with
+passed in canvas to draw on.\
+You can specify options to control how
+**TSGL** is initialised
 
 **Parameters**
 
-- **`canvas: HTMLCanvasElement`** - canvas on which the graphics will be rendered
-- **`options?: TSGLInitialOptions`** - (optional) initial options
-  - **`width?: number`** - (optional) width of the screen
-  - **`height?: number`** - (optional) height of the screen
-  - **`clearColor?: {r: number, g: number, b: number}`** - (optional) specifies the color of the canvas background color after every clear
+- **`canvas: HTMLCanvasElement`** - canvas on which the graphics will be rendered on
+- **`options?: TSGLInitialOptions`** - (optional)
+  - **`width?: number`** - (optional) width
+  - **`height?: number`** - (optional) and height of the viewport
+  - **`worldScale?: { x: number, y: number }`** - (optional) global scale factor, usefull when you want to upscale all graphics _x_ times
+  - **`clearColor?: { r: number, g: number, b: number }`** - (optional) specifies the color of the canvas background color after every clear
 
 **Example**
 
@@ -78,19 +80,20 @@ A function used to load an Image from the file. It returns promise that resolves
 const tsgl = TSGL.init(document.querySelector('canvas'), {
   width: 800,
   height: 600,
+  worldScale: { x: 2, y: 2 },
 });
 ```
 
-| Available functions inside `TSGLInstance`                                |
-| ------------------------------------------------------------------------ |
-| [loadImage(src): HTMLImageElement](#async-loadimagesrc-htmlimageelement) |
-| [setImage(img): void](#setimageimg-void)                                 |
-| [drawRect(x, y, w, h, rotation?): void](#drawrectx-y-w-h-rotation-void)  |
-| [drawText(text, x, y): void](#drawtexttext-x-y-void)                     |
+| Available functions inside `TSGLInstance`                                         |
+| --------------------------------------------------------------------------------- |
+| [`async createTexture(src) => TSGLTexture`](#async-createtexturesrc--tsgltexture) |
+| [`drawImage(img, x, y, options?)`](#drawimageimg-x-y-options)                     |
+| [`drawText(text, x, y)`](#drawtexttext-x-y)                                       |
 
-### `async loadImage(src): HTMLImageElement`
+### `async createTexture(src) => TSGLTexture`
 
-A function used to load an Image from the file. It returns promise that resolves to a simple `HTMLImageElement`. You don't need to use this function, you only need the `HTMLImageElement` to use in the `setImage()` function
+Function used to create a [`TSGLTexture`](#tsgltexture) from the file.\
+It returns a promise that resolves to said texture object, which is used inside [`drawImage`](#drawimageimg-x-y-options) function.
 
 **Parameters**
 
@@ -102,72 +105,46 @@ A function used to load an Image from the file. It returns promise that resolves
 (async function () {
   // ... initialising tsgl object with TSGL.init()
 
-  // load image from file
-  const img = await tsgl.loadImage('my_image.png');
+  // load image from file and create texture object
+  const img = await tsgl.createTexture('my_image.png');
 })();
 ```
 
-### `setImage(img): void`
+### `drawImage(img, x, y, options?)`
 
-A function used to set passed `HTMLImageElement` as an active texture ready to be drawn
+Function used to draw [`TSGLTexture`](#tsgltexture) onto the canvas
 
-**Parameters**
-
-- **`img: HTMLImageElement`** - image to be set as an active one
-
-**Example**
+- **`img: TSGLTexture`** - texture to be drawn
+- **`x: number`** - horizontal position of a texture
+- **`y: number`** - vertical position
+- **`options?: TSGLDrawOptions`** - (optional)
+  - **`width?: number`** - (optional) width
+  - **`height?: number`** - (optional) and height of the quad that the texture will be drawn on
+  - **`rotation?: number`** - (optional) rotation in radians
+  - **`region?: TSGLRegion`** - (optional) [region](#tsgltexture) of the texture to be rendered;
+    used when you want to render a tile out of tileset or a frame of an animation
 
 ```js
 (async function () {
   // ... initialising tsgl object with TSGL.init()
 
-  // load image from file
-  const img = await tsgl.loadImage('my_image.png');
-  // set image as active to be drawn
-  tsgl.setImage(img);
-})();
-```
-
-### `drawRect(x, y, w, h, rotation?): void`
-
-A function used to draw an image previously loaded into memory with `setImage()`
-
-- **`x: number`** - horizontal position of a rectangle
-- **`y: number`** - its vertical position
-- **`w: number`** - its width
-- **`h: number`** - its height
-- **`rotation?: number`** - (optional) rotation of the rect in radians
-
-```js
-(async function () {
-  // ... initialising tsgl object with TSGL.init()
-
-  // load image from file
-  const img = await tsgl.loadImage('my_image.png');
-  // set image as active to be drawn
-  tsgl.setImage(img);
+  // load image from file and create texture object
+  const img = await tsgl.createTexture('my_image.png');
   /*
-   * draw recently loaded image on a rect
-   * with size 100x100 on position (50,50)
+   * draw the texture on a rect of size 100x100
+   * on position (50,50)
    */
-  tsgl.drawRect(50, 50, 100, 100);
+  tsgl.drawImage(img, 50, 50, { width: 100, height: 100 });
 })();
 ```
 
-### ⚠️ **Note** ⚠️
+### `drawText(text, x, y)`
 
-An image must be set as active by using `setImage` method every time
-it needs to be drawn, but do not setImage before every `drawRect` call if
-you draw the same img over and over because `setImage` is an expensive operation
-when done multiple times in a short period of time
-
-### `drawText(text, x, y): void`
-
-A function used to draw text on a screen using build-in bitmap font
+Function used to draw text on a screen using built-in bitmap font
 
 - **`text: string`** - A string to be drawn onto the screen
-- **`x: number`** - horizontal position of the text
-- **`y: number`** - its vertical position
+- **`x: number`** - horizontal
+- **`y: number`** - and vertical position of the text
 
 ```js
 (async function () {
@@ -184,11 +161,39 @@ Only the basic ASCII characters as\
 `1234567890!?.,;:()[]+-="\`\
 are supported right now
 
+| `TSGL` custom objects                           |
+| ----------------------------------------------- |
+| [`class TSGLTexture`](#class-tsgltexture)       |
+| [`interface TSGLRegion`](#interface-tsglregion) |
+
+### `class TSGLTexture`
+
+Object representing an image on a sprite batch.\
+Created using [`createTexture()`](#async-createtexturesrc--tsgltexture) and used in
+[`drawImage()`](#drawimageimg-x-y-options) function to draw the image it represents onto the canvas.
+
+**Fields**
+
+- **`width: number`** - width of the original image
+- **`height: number`** - height of the original image
+
+### `interface TSGLRegion`
+
+Interface describing a texture region; part of a texture. Used as a paremeter of [`drawImage()`](#drawimageimg-x-y-options) to determine
+which part of the texture you want to draw. Can be used to draw a single frame out of an animation texture or a tileset
+
+**Fields**
+
+- **`x: number`**
+- **`y: number`**
+- **`width: number`**
+- **`height: number`**
+
 ## License
 
-[MIT](https://github.com/szymmis/tsgl/blob/master/LICENSE)
+[MIT](https://github.com/szymmis/tsgl/blob/main/LICENSE)
 
 ## Credits
 
-All credits to me
+All credits to
 [@szymmis](https://github.com/szymmis)
