@@ -1,7 +1,7 @@
 {
   "name": "@szymmis/tsgl",
   "description": "Yet another WebGL TypeScript wrapper",
-  "version": "0.1.4",
+  "version": "0.2.0",
   "license": "MIT",
   "repository": "git@github.com:szymmis/tsgl",
   "author": "Szymon Miśtal <mistalzaq@gmail.com>",
