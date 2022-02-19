@@ -1,20 +1,20 @@
-# TSGL - Simple TypeScript WebGL Library
+# 🖼️ TSGL - Simple TypeScript WebGL Library
 
 [![npm](https://img.shields.io/npm/v/@szymmis/tsgl)](https://www.npmjs.org/package/@szymmis/tsgl)
 [![downloads-per-week](https://img.shields.io/npm/dt/@szymmis/tsgl?color=red)](https://www.npmjs.org/package/@szymmis/tsgl)
 [![license](https://img.shields.io/npm/l/@szymmis/tsgl?color=purple)](https://www.npmjs.org/package/@szymmis/tsgl)
 
-## Introduction
+## 💬 Introduction
 
 **TSGL** is a basic wrapper on **WebGL** primitive API. \
 You don't need to worry about creating shaders, compiling programs etc.\
-Simply create a **TSGLInstance** object with `init` function and use
+Simply create a **TSGLInstance** object with [`init()`](#initcanvas-options--tsglinstance) function and use
 it's exposed functions such as
 
 - [`drawImage()`](#drawimageimg-x-y-options)
 - [`drawText()`](#drawtexttext-x-y)
 
-## Installation and usage
+## ⚙️ Installation and usage
 
 You can use **TSGL** in every possible way.
 
@@ -51,9 +51,9 @@ const TSGL = require('@szymmis/tsgl'); // CommonJS
 </body>
 ```
 
-## Documentation
+## 📝 Documentation
 
-| Available functions inside global `TSGL` object                               |
+| `TSGL` object functions                                                       |
 | ----------------------------------------------------------------------------- |
 | [`init(canvas, options?) => TSGLInstance`](#initcanvas-options--tsglinstance) |
 
@@ -70,7 +70,8 @@ You can specify options to control how
 - **`options?: TSGLInitialOptions`** - (optional)
   - **`width?: number`** - (optional) width
   - **`height?: number`** - (optional) and height of the viewport
-  - **`worldScale?: { x: number, y: number }`** - (optional) global scale factor, usefull when you want to upscale all graphics _x_ times
+  - **`worldScale?: { x: number, y: number }`** - (optional) global scale factor;\
+    usefull when you have small sprites and want to upscale them at render _x_ times
   - **`clearColor?: { r: number, g: number, b: number }`** - (optional) specifies the color of the canvas background color after every clear
 
 **Example**
@@ -84,7 +85,7 @@ const tsgl = TSGL.init(document.querySelector('canvas'), {
 });
 ```
 
-| Available functions inside `TSGLInstance`                                         |
+| `TSGLInstance` functions                                                          |
 | --------------------------------------------------------------------------------- |
 | [`async createTexture(src) => TSGLTexture`](#async-createtexturesrc--tsgltexture) |
 | [`drawImage(img, x, y, options?)`](#drawimageimg-x-y-options)                     |
@@ -92,8 +93,8 @@ const tsgl = TSGL.init(document.querySelector('canvas'), {
 
 ### `async createTexture(src) => TSGLTexture`
 
-Function used to create a [`TSGLTexture`](#tsgltexture) from the file.\
-It returns a promise that resolves to said texture object, which is used inside [`drawImage`](#drawimageimg-x-y-options) function.
+Function used to create a [`TSGLTexture`](#class-tsgltexture) from a file.\
+It returns a promise that resolves to said texture object, which is used inside [`drawImage()`](#drawimageimg-x-y-options) function.
 
 **Parameters**
 
@@ -112,16 +113,16 @@ It returns a promise that resolves to said texture object, which is used inside 
 
 ### `drawImage(img, x, y, options?)`
 
-Function used to draw [`TSGLTexture`](#tsgltexture) onto the canvas
+Function used to draw [`TSGLTexture`](#class-tsgltexture) onto the canvas
 
 - **`img: TSGLTexture`** - texture to be drawn
-- **`x: number`** - horizontal position of a texture
-- **`y: number`** - vertical position
+- **`x: number`** - horizontal
+- **`y: number`** - and vertical position of a texture
 - **`options?: TSGLDrawOptions`** - (optional)
   - **`width?: number`** - (optional) width
   - **`height?: number`** - (optional) and height of the quad that the texture will be drawn on
   - **`rotation?: number`** - (optional) rotation in radians
-  - **`region?: TSGLRegion`** - (optional) [region](#tsgltexture) of the texture to be rendered;
+  - **`region?: TSGLRegion`** - (optional) [region](#interface-tsglregion) of the texture to be rendered;\
     used when you want to render a tile out of tileset or a frame of an animation
 
 ```js
@@ -140,7 +141,7 @@ Function used to draw [`TSGLTexture`](#tsgltexture) onto the canvas
 
 ### `drawText(text, x, y)`
 
-Function used to draw text on a screen using built-in bitmap font
+Function used to draw text on the canvas using built-in bitmap font
 
 - **`text: string`** - A string to be drawn onto the screen
 - **`x: number`** - horizontal
@@ -156,7 +157,7 @@ Function used to draw text on a screen using built-in bitmap font
 
 ### ⚠️ **Note** ⚠️
 
-Only the basic ASCII characters as\
+Only the basic characters as\
 `aąbcćdeęfghijklłmnoópqrstuvwxyzźż`\
 `1234567890!?.,;:()[]+-="\`\
 are supported right now
@@ -170,7 +171,7 @@ are supported right now
 
 Object representing an image on a sprite batch.\
 Created using [`createTexture()`](#async-createtexturesrc--tsgltexture) and used in
-[`drawImage()`](#drawimageimg-x-y-options) function to draw the image it represents onto the canvas.
+[`drawImage()`](#drawimageimg-x-y-options) to draw the image it represents onto the canvas.
 
 **Fields**
 
@@ -179,8 +180,10 @@ Created using [`createTexture()`](#async-createtexturesrc--tsgltexture) and used
 
 ### `interface TSGLRegion`
 
-Interface describing a texture region; part of a texture. Used as a paremeter of [`drawImage()`](#drawimageimg-x-y-options) to determine
-which part of the texture you want to draw. Can be used to draw a single frame out of an animation texture or a tileset
+Interface describing a texture region - a part of a texture.\
+Used as a paremeter of [`drawImage()`](#drawimageimg-x-y-options) to determine
+which part of the texture you want to draw.\
+Can be used to draw a single frame out of an animation texture or a tileset
 
 **Fields**
 
@@ -189,11 +192,11 @@ which part of the texture you want to draw. Can be used to draw a single frame o
 - **`width: number`**
 - **`height: number`**
 
-## License
+## 🏦 License
 
 [MIT](https://github.com/szymmis/tsgl/blob/main/LICENSE)
 
-## Credits
+## 🖥️ Credits
 
-All credits to
+Programming and documentation
 [@szymmis](https://github.com/szymmis)
